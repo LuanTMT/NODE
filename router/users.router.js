@@ -12,56 +12,139 @@ const {
 
 const jsonparser = bodyParser.json();
 
-//Creat User
-router.post("/", jsonparser, async (req, res) => {
-  const data = req.body;
-  const user = await User.create(data);
-  res.json(user);
-});
-
 //read all user
 router.get("/", async (req, res) => {
-  await sequelize.authenticate();
-  const users = await User.findAll();
-  res.json(users);
+  try {
+    const users = await User.findAll();
+    if (users) {
+      res.status(200);
+      res.json(users);
+    }
+    else{
+      res.status(404);
+      res.json({ message: "Error: server don't found data " });
+    }
+  } catch (error) {
+    res.status(500);
+    res.json({ message: "server got error" });
+  } 
 });
 
-//read 1 user
-router.get("/user", async (req, res) => {
-  const firstName = req.query.firstName;
-  const user = await User.findOne({
-    where: {
-      firstName: firstName
-    },
-  });
-  res.json(user);
+//read 1 user with id
+router.get("/:id", async (req, res) => {
+  const {id} = req.params;
+  try {
+    const found = await User.findOne({
+      where: {
+        id,
+      },
+    });
+    if (found) {
+      res.status(200);
+      res.json(found);
+    }
+    else{
+      res.status(404);
+      res.json({ message: "not found" });
+    }
+  } catch (error) {
+    res.status(500);
+    res.json({ message: "server got error" });
+  } 
 })
 
-// update user
-router.put('/up', jsonparser, async (req, res) => {
-  // const id = req.params.id; 
-  const id = req.query.id
-  const newdb = req.body;
-  await User.update({
-    firstName: `${newdb.firstName}`,
-    lastName: `${newdb.lastName}`,
-    age: `${newdb.age}`
-  }, {
-    where: {
-      id: id
+//Creat User
+router.post("/", jsonparser, async (req, res) => {
+  try {
+    const data = req.body;
+    if (data) {
+      const user = await User.create(data);
+      res.status(200);
+      res.json(user);
     }
-  });
-  res.send('Update succsessfully!');
+    else{
+      res.status(404);
+      res.json({ message: "Error: server don't found input data " });
+    }
+  } catch (error) {
+    res.status(500);
+    res.json({ message: "server got error" });
+  }
+  
+});
+
+// update user
+router.put('/:id', jsonparser, async (req, res) => {
+  const {
+    id
+  } = req.params;
+  const {
+    firstName,
+    lastName,
+    age
+  } = req.body;
+  try {
+    const find = await User.findOne({
+      where: {
+        id,
+      }
+    })
+    if (!find) {
+      res.status(404)
+      res.send({
+        messeage: "don't find data"
+      })
+    } else {
+      const data = await User.update({
+        firstName,
+        lastName,
+        age
+      }, {
+        where: {
+          id,
+        }
+      });
+      res.status(200)
+      res.send('Update succsessfully!');
+    }
+  } catch (error) {
+    res.status(500);
+    res.json({
+      messeage: "Server get error while updating data"
+    })
+  }
+
 });
 
 // delete user
 router.delete('/:id', async (req, res) => {
-  const idUser = req.params.id;
-  await User.destroy({
-    where: {
-      id: idUser
+  const {
+    id
+  } = req.params;
+  try {
+    const find = await User.findOne({
+      where: {
+        id,
+      }
+    })
+    if (!find) {
+      res.status(404)
+      res.send({
+        messeage: "don't find data"
+      })
+    } else {
+     const deleteUser = await User.destroy({
+        where: {
+          id,
+        }
+      });
     }
-  });
-  res.send('Delete succsessfully!');
+    res.send('Delete succsessfully!');
+  } catch (error) {
+    res.status(500);
+    res.json({
+      messeage: "Server get error while delete data"
+    })
+  }
 });
 module.exports = router;

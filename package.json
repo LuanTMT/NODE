@@ -5,11 +5,13 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "debug":"set DEBUG=express:* & node index.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "debug": "^4.3.4",
     "express": "^4.18.1",
     "giti": "^1.1.7",
     "mysql2": "^2.3.3",
